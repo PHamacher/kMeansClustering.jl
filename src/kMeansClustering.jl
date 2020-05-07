@@ -1,7 +1,7 @@
-function f(n)
+function f(pontos)
 #k=3
 l=[]
-for m in 1:n
+for m in 1:pontos
     p=rand(3)
     push!(l,p)
 end
