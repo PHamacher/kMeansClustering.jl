@@ -14,7 +14,6 @@ while centroides!=copia
         d2=(p[1]-centroides[2][1])^2+(p[2]-centroides[2][2])^2+(p[3]-centroides[2][3])^2
         d3=(p[1]-centroides[3][1])^2+(p[2]-centroides[3][2])^2+(p[3]-centroides[3][3])^2
         menor=min(d1,d2,d3)
-        s+=menor
         if menor==d1
             push!(c1,p)
         elseif menor==d2
