@@ -1,63 +1,63 @@
-function SquaredEuclideanDistance(v,w)
-    dist=0
+function squared_euclidean_distance(v,w)
+    dist = 0
     for d in 1:length(v)
-        dist+=(v[d]-w[d])^2
+        dist+= (v[d]-w[d])^2
     end
     return dist
 end
 
-function agrupa(matriz)
-    l=[]
-    dim=size(matriz)[1]
-    npontos=size(matriz)[2]
+function agroup(matriz)
+    l = [Float64[]]
+    pop!(l)
+    dim,npontos = size(matriz)
     for p in 1:npontos
-        v=[]
+        v = Float64[]
         for d in 1:dim
             push!(v,matriz[dim*(p-1)+d])
         end
         push!(l,v)
     end
-    return (l,dim)
+    return l,dim
 end
 
-function ComparaDist(p,antigoctr,novoctr)
-    antigadist=SquaredEuclideanDistance(p,antigoctr)
-    novadist=SquaredEuclideanDistance(p,novoctr)
+function compare_distance(p,antigoctr,novoctr)
+    antigadist = squared_euclidean_distance(p,antigoctr)
+    novadist = squared_euclidean_distance(p,novoctr)
     if novadist<=antigadist
-        centroide=novoctr
-    else
-        centroide=antigoctr
+        return novoctr
     end
-    return centroide
+    return antigoctr
 end
 
 function dic(l,centroides)
-    dicCentroides=Dict()
+    dicCentroides = Dict()
     for ctr in centroides
-        dicCentroides[ctr]=[]
+        dicCentroides[ctr] = [Float64[]]
+        pop!(dicCentroides[ctr])
     end
     for p in l
-        centroide=centroides[1]
+        centroide = centroides[1]
         for ctr in centroides
-            centroide=ComparaDist(p,centroide,ctr)
+            centroide = compare_distance(p,centroide,ctr)
         end
-        c=dicCentroides[centroide]
+        c = dicCentroides[centroide]
         push!(c,p)
-        dicCentroides[centroide]=c
+        dicCentroides[centroide] = c
     end
     return dicCentroides
 end
 
-function reorganiza(clusters,dim)
-    centroides=[]
+function reorganize(clusters,dim)
+    centroides = [Float64[]]
+    pop!(centroides)
     for cluster in clusters
-        s=zeros(dim)
+        s = zeros(dim)
         for p in cluster
             for n in 1:dim
-                s[n]+=p[n]
+                s[n]+= p[n]
             end
         end
-        medias=[]
+        medias = Float64[]
         for d in s
             push!(medias,d/length(cluster))
         end
@@ -67,39 +67,40 @@ function reorganiza(clusters,dim)
 end
 
 function cost(dicCentroides)
-    custo=0
+    custo = 0
     for (centr,clus) in dicCentroides
         for p in clus
-            custo+=SquaredEuclideanDistance(p,centr)
+            custo+=squared_euclidean_distance(p,centr)
         end
     end
     return custo
 end
 
-function atribui(clusters,l)
-    dicAssign=Dict()
+function assign(clusters,l)
+    dicAssign = Dict()
     for n in 1:length(clusters)
         for el in clusters[n]
-            dicAssign[el]=n
+            dicAssign[el] = n
         end
     end
-    lAssign=[]
+    lAssign = Int64[]
     for p in l
         push!(lAssign,dicAssign[p])
     end
     return lAssign
 end
 
-function AdequaFormato(centroides)
-    novo=hcat(centroides[1],centroides[2])
+function new_format(centroides)
+    novo = hcat(centroides[1],centroides[2])
     for p in centroides[3:length(centroides)]
-        novo=hcat(novo,p)
+        novo = hcat(novo,p)
     end
     return novo
 end
 
-function BuildClusters(dicCentroides)
-    clusters=[]
+function build_clusters(dicCentroides)
+    clusters = [[Float64[]]]
+    pop!(clusters)
     for (centroide,cluster) in dicCentroides
         push!(clusters,cluster)
     end
@@ -107,22 +108,25 @@ function BuildClusters(dicCentroides)
 end
 
 function mykmeansclustering(matriz,k)
-    l,dim=agrupa(matriz)
-    centroides=[]
+    l,dim = agroup(matriz)
+    centroides = [Float64[]]
+    pop!(centroides)
     while length(unique(centroides))<k
-        centroides=rand(l,k) # Forgy Method
+        centroides = rand(l,k) # Forgy Method
     end
-    copia=[]
+    iniciais = centroides
+    copia = [Float64[]]
+    pop!(copia)
     while centroides!=copia
-        dicCentroides=dic(l,centroides)
-        copia=centroides[1:k]
-        clusters=BuildClusters(dicCentroides)
-        centroides=reorganiza(clusters,dim)
+        dicCentroides = dic(l,centroides)
+        copia = centroides[1:k]
+        clusters = build_clusters(dicCentroides)
+        centroides = reorganize(clusters,dim)
     end
-    dicCentroides=dic(l,centroides)
-    clusters=BuildClusters(dicCentroides)
-    custo=cost(dicCentroides)
-    assign=atribui(clusters,l)
-    centroides=AdequaFormato(centroides)
-    return centroides,custo,assign
+    dicCentroides = dic(l,centroides)
+    clusters = build_clusters(dicCentroides)
+    custo = cost(dicCentroides)
+    atribui = assign(clusters,l)
+    centroides = new_format(centroides)
+    return centroides,custo,atribui,iniciais
 end
