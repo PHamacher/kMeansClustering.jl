@@ -130,6 +130,7 @@ function mykmeansclustering(matrix::Matrix{Float64},k::Int64)
     cst = cost(dic_centers)
     assignment = assign(clusters,l)
     centers = new_format(centers)
+    initials = new_format(initials)
     return centers,cst,assignment,initials
 end
 
