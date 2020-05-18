@@ -1,4 +1,4 @@
-function squared_euclidean_distance(v,w)
+function squared_euclidean_distance(v::Array{Float64},w::Array{Float64})
     dist = 0
     for d in 1:length(v)
         dist+= (v[d]-w[d])^2
@@ -6,50 +6,50 @@ function squared_euclidean_distance(v,w)
     return dist
 end
 
-function agroup(matriz)
+function agroup(matrix::Matrix{Float64})
     l = [Float64[]]
     pop!(l)
-    dim,npontos = size(matriz)
-    for p in 1:npontos
+    dim,n_points = size(matrix)
+    for p in 1:n_points
         v = Float64[]
         for d in 1:dim
-            push!(v,matriz[dim*(p-1)+d])
+            push!(v,matrix[dim*(p-1)+d])
         end
         push!(l,v)
     end
     return l,dim
 end
 
-function compare_distance(p,antigoctr,novoctr)
-    antigadist = squared_euclidean_distance(p,antigoctr)
-    novadist = squared_euclidean_distance(p,novoctr)
-    if novadist<=antigadist
-        return novoctr
+function compare_distance(p::Array{Float64},old_ctr::Array{Float64},new_ctr::Array{Float64})
+    old_dist = squared_euclidean_distance(p,old_ctr)
+    new_dist = squared_euclidean_distance(p,new_ctr)
+    if new_dist<=old_dist
+        return new_ctr
     end
-    return antigoctr
+    return old_ctr
 end
 
-function dic(l,centroides)
-    dicCentroides = Dict()
-    for ctr in centroides
-        dicCentroides[ctr] = [Float64[]]
-        pop!(dicCentroides[ctr])
+function dic(l::Array{Array{Float64}},centers::Array{Array{Float64}})
+    dic_centers = Dict()
+    for ctr in centers
+        dic_centers[ctr] = [Float64[]]
+        pop!(dic_centers[ctr])
     end
     for p in l
-        centroide = centroides[1]
-        for ctr in centroides
-            centroide = compare_distance(p,centroide,ctr)
+        center = centers[1]
+        for ctr in centers
+            center = compare_distance(p,center,ctr)
         end
-        c = dicCentroides[centroide]
+        c = dic_centers[center]
         push!(c,p)
-        dicCentroides[centroide] = c
+        dic_centers[center] = c
     end
-    return dicCentroides
+    return dic_centers
 end
 
-function reorganize(clusters,dim)
-    centroides = [Float64[]]
-    pop!(centroides)
+function reorganize(clusters::Array{Array{Array{Float64}}},dim::Int64)
+    centers = [Float64[]]
+    pop!(centers)
     for cluster in clusters
         s = zeros(dim)
         for p in cluster
@@ -57,76 +57,76 @@ function reorganize(clusters,dim)
                 s[n]+= p[n]
             end
         end
-        medias = Float64[]
+        means = Float64[]
         for d in s
-            push!(medias,d/length(cluster))
+            push!(means,d/length(cluster))
         end
-        push!(centroides,medias)
+        push!(centers,means)
     end
-    return centroides
+    return centers
 end
 
-function cost(dicCentroides)
-    custo = 0
-    for (centr,clus) in dicCentroides
+function cost(dic_centers::Dict{Array{Float64},Array{Array{Float64}}})
+    cst = 0
+    for (centr,clus) in dic_centers
         for p in clus
-            custo+=squared_euclidean_distance(p,centr)
+            cst+=squared_euclidean_distance(p,centr)
         end
     end
-    return custo
+    return cst
 end
 
-function assign(clusters,l)
-    dicAssign = Dict()
+function assign(clusters::Array{Array{Array{Float64}}},l::Array{Array{Float64}})
+    dic_assign = Dict()
     for n in 1:length(clusters)
         for el in clusters[n]
-            dicAssign[el] = n
+            dic_assign[el] = n
         end
     end
-    lAssign = Int64[]
+    l_assign = Int64[]
     for p in l
-        push!(lAssign,dicAssign[p])
+        push!(l_assign,dic_assign[p])
     end
-    return lAssign
+    return l_assign
 end
 
-function new_format(centroides)
-    novo = hcat(centroides[1],centroides[2])
-    for p in centroides[3:length(centroides)]
-        novo = hcat(novo,p)
+function new_format(centers::Array{Array{Float64}})
+    new = hcat(centers[1],centers[2])
+    for p in centers[3:length(centers)]
+        new = hcat(new,p)
     end
-    return novo
+    return new
 end
 
-function build_clusters(dicCentroides)
+function build_clusters(dic_centers::Dict{Array{Float64},Array{Array{Float64}}})
     clusters = [[Float64[]]]
     pop!(clusters)
-    for (centroide,cluster) in dicCentroides
+    for (center,cluster) in dic_centers
         push!(clusters,cluster)
     end
     return clusters
 end
 
-function mykmeansclustering(matriz,k)
-    l,dim = agroup(matriz)
-    centroides = [Float64[]]
-    pop!(centroides)
-    while length(unique(centroides))<k
-        centroides = rand(l,k) # Forgy Method
+function mykmeansclustering(matrix::Matrix{Float64},k::Int64)
+    l,dim = agroup(matrix)
+    centers = [Float64[]]
+    pop!(centers)
+    while length(unique(centers))<k
+        centers = rand(l,k) # Forgy Method
     end
-    iniciais = centroides
-    copia = [Float64[]]
-    pop!(copia)
-    while centroides!=copia
-        dicCentroides = dic(l,centroides)
-        copia = centroides[1:k]
-        clusters = build_clusters(dicCentroides)
-        centroides = reorganize(clusters,dim)
+    initials = centers
+    cop = [Float64[]]
+    pop!(cop)
+    while centers!=cop
+        dic_centers = dic(l,centers)
+        cop = centers[1:k]
+        clusters = build_clusters(dic_centers)
+        centers = reorganize(clusters,dim)
     end
-    dicCentroides = dic(l,centroides)
-    clusters = build_clusters(dicCentroides)
-    custo = cost(dicCentroides)
-    atribui = assign(clusters,l)
-    centroides = new_format(centroides)
-    return centroides,custo,atribui,iniciais
+    dic_centers = dic(l,centers)
+    clusters = build_clusters(dic_centers)
+    cst = cost(dic_centers)
+    assignment = assign(clusters,l)
+    centers = new_format(centers)
+    return centers,cst,assignment,initials
 end
