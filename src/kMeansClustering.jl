@@ -1,3 +1,5 @@
+module kMeansClustering
+
 function squared_euclidean_distance(v::Array{Float64},w::Array{Float64})
     dist = 0
     for d in 1:length(v)
@@ -130,3 +132,8 @@ function mykmeansclustering(matrix::Matrix{Float64},k::Int64)
     centers = new_format(centers)
     return centers,cst,assignment,initials
 end
+
+export mykmeansclustering
+
+end
+
