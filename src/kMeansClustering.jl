@@ -22,7 +22,7 @@ function agroup(matrix::Matrix{Float64})
     return l,dim
 end
 
-function compare_distance(p::Array{Float64},old_ctr::Array{Float64},new_ctr::Array{Float64})
+function compare_distance(p::Array{Float64,1},old_ctr::Array{Float64,1},new_ctr::Array{Float64,1})
     old_dist = squared_euclidean_distance(p,old_ctr)
     new_dist = squared_euclidean_distance(p,new_ctr)
     if new_dist<=old_dist
@@ -31,7 +31,8 @@ function compare_distance(p::Array{Float64},old_ctr::Array{Float64},new_ctr::Arr
     return old_ctr
 end
 
-function dic(l::Array{Array{Float64}},centers::Array{Array{Float64}})
+
+function dic(l::Array{Array{Float64,1},1},centers::Array{Array{Float64,1},1})
     dic_centers = Dict()
     for ctr in centers
         dic_centers[ctr] = [Float64[]]
@@ -49,7 +50,7 @@ function dic(l::Array{Array{Float64}},centers::Array{Array{Float64}})
     return dic_centers
 end
 
-function reorganize(clusters::Array{Array{Array{Float64}}},dim::Int64)
+function reorganize(clusters::Array{Array{Array{Float64,1},1},1},dim::Int64)
     centers = [Float64[]]
     pop!(centers)
     for cluster in clusters
@@ -68,7 +69,7 @@ function reorganize(clusters::Array{Array{Array{Float64}}},dim::Int64)
     return centers
 end
 
-function cost(dic_centers::Dict{Array{Float64},Array{Array{Float64}}})
+function cost(dic_centers::Dict{Any,Any})
     cst = 0
     for (centr,clus) in dic_centers
         for p in clus
@@ -78,7 +79,7 @@ function cost(dic_centers::Dict{Array{Float64},Array{Array{Float64}}})
     return cst
 end
 
-function assign(clusters::Array{Array{Array{Float64}}},l::Array{Array{Float64}})
+function assign(clusters::Array{Array{Array{Float64,1},1},1},l::Array{Array{Float64,1},1})
     dic_assign = Dict()
     for n in 1:length(clusters)
         for el in clusters[n]
@@ -92,7 +93,7 @@ function assign(clusters::Array{Array{Array{Float64}}},l::Array{Array{Float64}})
     return l_assign
 end
 
-function new_format(centers::Array{Array{Float64}})
+function new_format(centers::Array{Array{Float64,1},1})
     new = hcat(centers[1],centers[2])
     for p in centers[3:length(centers)]
         new = hcat(new,p)
@@ -100,7 +101,7 @@ function new_format(centers::Array{Array{Float64}})
     return new
 end
 
-function build_clusters(dic_centers::Dict{Array{Float64},Array{Array{Float64}}})
+function build_clusters(dic_centers::Dict{Any,Any})
     clusters = [[Float64[]]]
     pop!(clusters)
     for (center,cluster) in dic_centers
@@ -135,6 +136,4 @@ function mykmeansclustering(matrix::Matrix{Float64},k::Int64)
 end
 
 export mykmeansclustering
-
 end
-
