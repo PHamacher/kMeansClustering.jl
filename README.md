@@ -8,7 +8,7 @@
 # Features
 Perform the clustering algorithm k-means, which split a set of points into k clusters.
 
-# Example
+# Examples
 ```julia
 
 using kMeansClustering, Random
