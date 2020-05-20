@@ -11,7 +11,7 @@ Perform the clustering algorithm k-means, which split a set of points into k clu
 # Examples
 ```julia
 
-using kMeansClustering, Random
+using kMeansClustering
   
 mat = rand(3,100) # generate 100 3-dimensional points
 r = mykmeansclustering(mat,4) # organize mat in k=4 clusters
