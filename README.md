@@ -23,5 +23,14 @@ r = mykmeansclustering(mat,4) # organize mat in k=4 clusters
     r[3] -> assignments
   
     r[4] -> initial centers used (Forgy method)
-```
+
+```julia
+using RDatasets, kMeansClustering, Plots
+iris = dataset("datasets", "iris");
+features = collect(Matrix(iris[:, 1:4])');
+r = mykmeansclustering(features, 3); # split data into k=3 clusters
+scatter(iris.PetalLength, iris.PetalWidth, marker_z=r[3],
+        color=:lightrainbow, legend=false)
+ ```
+ ![Screenshot (8)](https://user-images.githubusercontent.com/64922101/82483770-5557e780-9aaf-11ea-90a7-a9d45259aaac.png)
 
