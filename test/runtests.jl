@@ -1,10 +1,18 @@
 using kMeansClustering
 using Test
 using Random
+using Clustering
 
 @testset "kMeansClustering.jl" begin
     Random.seed!(1)
-    X = rand(2,100)
-    Y = X
-    @test mykmeansclustering(X,4)[1:3] == mykmeansclustering(Y,4)[1:3]
+    n_points=1000
+    dim=4
+    mat = rand(dim,n_points)
+    k = 10
+    r = mykmeansclustering(mat,k) # organize mat into k clusters
+    @test size(r[1]) == (dim,k)
+    @test length(r[3]) == n_points
+    c=r[4]
+    kmeans!(X,c)
+    @test sortslices(r[1],dims=2) == sortslices(c,dims=2)
 end
