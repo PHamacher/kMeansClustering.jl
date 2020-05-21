@@ -13,6 +13,6 @@ using Clustering
     @test size(r[1]) == (dim,k)
     @test length(r[3]) == n_points
     c=r[4]
-    kmeans!(X,c)
+    kmeans!(mat,c)
     @test sortslices(r[1],dims=2) == sortslices(c,dims=2)
 end
